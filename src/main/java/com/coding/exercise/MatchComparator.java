@@ -11,7 +11,7 @@ public class MatchComparator implements Comparator<Match> {
      * <ul>
      *     <li>the match with a lower total score is "greater";</li>
      *     <li>in case of equal total scores, the start time of the match is taken into account:
-     *     the more recently started match is "greater";</li>
+     *     the match which started earlier is "greater";</li>
      *     <li>in case the matches started at the same time,
      *     the concatenated team names' lexicographic order decides.</li>
      * </ul>
@@ -22,9 +22,9 @@ public class MatchComparator implements Comparator<Match> {
         if (scoreDifference != 0) {
             return scoreDifference;
         } else {
-            long startTimeDifference = o1.getStartTime() - o2.getStartTime();
+            long startTimeDifference = o2.getStartTime() - o1.getStartTime();
             if (startTimeDifference == 0) {
-                return -1 * (o1.getTeams().compareTo(o2.getTeams())); // not to be inconsistent with equals
+                return o1.getTeams().compareTo(o2.getTeams()); // not to be inconsistent with equals
             } else if (startTimeDifference < 0) {
                 return -1;
             } else {

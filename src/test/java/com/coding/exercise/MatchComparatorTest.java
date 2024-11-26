@@ -33,21 +33,21 @@ class MatchComparatorTest {
     @Test
     void testScoreEqualityMatch1BeganEarlier() {
         int comparatorResult = comparator.compare(match1, match2);
-        Assertions.assertTrue(comparatorResult < 0);
+        Assertions.assertTrue(comparatorResult > 0);
     }
 
     @Test
     void testScoreEqualityMatch2BeganEarlier() {
         this.match1 = new Match("England", "France", 1732549027700L);
         int comparatorResult = comparator.compare(match1, match2);
-        Assertions.assertTrue(comparatorResult > 0);
+        Assertions.assertTrue(comparatorResult < 0);
     }
 
     @Test
     void testScoreEqualityStartedSameTime() {
         this.match1 = new Match("England", "France", 1732549027600L);
         int comparatorResult = comparator.compare(match1, match2);
-        Assertions.assertTrue(comparatorResult > 0);
+        Assertions.assertTrue(comparatorResult < 0);
     }
 
     @Test
