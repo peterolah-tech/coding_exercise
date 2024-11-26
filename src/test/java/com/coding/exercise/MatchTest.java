@@ -8,6 +8,12 @@ class MatchTest {
     private final Match match = new Match("Hungary", "Norway");
 
     @Test
+    void testGetSumOfScore() {
+        match.setScore(new ImmutablePair<>(2,1));
+        Assertions.assertEquals(3, match.getSumOfScore());
+    }
+
+    @Test
     void testGetTeams() {
         Assertions.assertEquals("HungaryNorway", match.getTeams());
     }

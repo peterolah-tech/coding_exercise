@@ -20,8 +20,16 @@ public class Match {
         this.score = new ImmutablePair<>(0, 0);
     }
 
+    public long getStartTime() {
+        return startTime;
+    }
+
     public @NonNull ImmutablePair<Integer, Integer> getScore() {
         return score;
+    }
+
+    public int getSumOfScore() {
+        return score.left + score.right;
     }
 
     public @NonNull String getTeams() {
