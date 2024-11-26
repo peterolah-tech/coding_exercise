@@ -24,6 +24,14 @@ public class Match {
         return startTime;
     }
 
+    public String getHomeTeamName() {
+        return homeTeamName;
+    }
+
+    public String getAwayTeamName() {
+        return awayTeamName;
+    }
+
     public @NonNull ImmutablePair<Integer, Integer> getScore() {
         return score;
     }
