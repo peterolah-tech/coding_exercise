@@ -25,7 +25,7 @@ public class Match {
     }
 
     public @NonNull String getTeams() {
-        return "";
+        return homeTeamName + awayTeamName;
     }
     public void setScore(final @NonNull ImmutablePair<Integer, Integer> newScore) {
         this.score = newScore;
@@ -33,6 +33,6 @@ public class Match {
 
     @Override
     public @NonNull String toString() {
-        return "";
+        return homeTeamName + " " + score.left + " - " + awayTeamName + " " + score.right;
     }
 }
