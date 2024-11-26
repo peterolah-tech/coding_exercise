@@ -14,6 +14,12 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+/**
+ * The class is an implementation of a live football world cup score board which enables registering and presenting
+ * information about ongoing matches.
+ * <p>The implementation uses a {@link ReadWriteLock} to ensure thread-safety (as read operations are expected to be
+ * considerably more frequent than write operations).
+ */
 public class ScoreBoard {
     private static final String NOT_PLAYING_EXCEPTION_MESSAGE =
             "These teams are not currently playing each other";
@@ -31,6 +37,9 @@ public class ScoreBoard {
         this.board = board;
     }
 
+    /**
+     * Start a new {@link Match} and register it on the board.
+     */
     public void startMatch(final @NonNull String homeTeamName, final @NonNull String awayTeamName) {
         Preconditions.checkArgument(!homeTeamName.isBlank() && !awayTeamName.isBlank(),
                 "The teams names cannot be blank");
@@ -43,6 +52,10 @@ public class ScoreBoard {
         }
     }
 
+    /**
+     * Update the score of an existing {@link Match}: the immutable pair's 'left' value should hold
+     * the home team's score and the 'right' value should hold the away team's score.
+     */
     public void updateScore(
             final @NonNull String homeTeamName,
             final @NonNull String awayTeamName,
@@ -66,6 +79,9 @@ public class ScoreBoard {
         }
     }
 
+    /**
+     * Finish an existing {@link Match} and deregister it from the score board.
+     */
     public void finishMatch(final @NonNull String homeTeamName, final @NonNull String awayTeamName) {
         writeLock.lock();
         try {
@@ -81,6 +97,14 @@ public class ScoreBoard {
         }
     }
 
+    /**
+     * Get a summary of the currently ongoing {@link Match}es:
+     * <ul>
+     *     <li>the matches are ordered by their total score (higher ones on top);</li>
+     *     <li>in case of equal total scores, the more recently started match is shown first;</li>
+     *     <li>if even the start time is the same, then those matches are shown in a lexicographic order.</li>
+     * </ul>
+     */
     public @NonNull String getSummary() {
         readLock.lock();
         if (board.isEmpty()) {
@@ -104,6 +128,11 @@ public class ScoreBoard {
         }
     }
 
+    /**
+     * Ensure that neither the home, neither the away team is currently playing a match.
+     *
+     * @throws IllegalArgumentException if a team is already registered on the board.
+     */
     private void validateTeams(final @NonNull String homeTeamName, final @NonNull String awayTeamName) {
         List<String> allTeams = board.stream()
                 .map(match -> List.of(match.getHomeTeamName(), match.getAwayTeamName()))
@@ -114,6 +143,16 @@ public class ScoreBoard {
         }
     }
 
+    /**
+     * Ensure the following constraints:
+     * <ul>
+     *     <li>the score is actually updated (no point in setting the same score);</li>
+     *     <li>none of the scores are negative;</li>
+     *     <li>at least one of the scores is higher than the currently registered value.</li>
+     * </ul>
+     *
+     * @throws IllegalArgumentException if the listed constraints are not met.
+     */
     private void validateNewScore(
             final @NonNull ImmutablePair<Integer, Integer> oldScore,
             final @NonNull ImmutablePair<Integer, Integer> newScore) {
@@ -125,6 +164,10 @@ public class ScoreBoard {
                 "At least one of the scores should be higher than the current one");
     }
 
+    /**
+     * Returns a {@link Match} if the requested teams are currently playing. Otherwise, returns an empty optional
+     * if the two teams are not registered on the board.
+     */
     private @NonNull Optional<Match> getMatch(final @NonNull String homeTeamName, final @NonNull String awayTeamName) {
         String lookedUpTeams = homeTeamName + awayTeamName;
         return board.stream()

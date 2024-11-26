@@ -4,14 +4,21 @@ import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+/**
+ * Class to hold information about a match.
+ * <p>The initial score is set to 0-0 automatically.
+ * Also, the start time of the match is set based on {@link System#currentTimeMillis()} method.
+ */
 public class Match {
     private final long startTime;
     private final @NonNull String homeTeamName;
     private final @NonNull String awayTeamName;
     private @NonNull ImmutablePair<Integer, Integer> score;
+
     public Match(final @NonNull String homeTeamName, final @NonNull String awayTeamName) {
         this(homeTeamName, awayTeamName, System.currentTimeMillis());
     }
+
     @VisibleForTesting
     Match(final @NonNull String homeTeamName, final @NonNull String awayTeamName, final long startTime) {
         this.startTime = startTime;
@@ -32,17 +39,28 @@ public class Match {
         return awayTeamName;
     }
 
+    /**
+     * Returns the score of the match: the immutable pair's 'left' value holds the home team's score and
+     * the 'right' value holds the away team's score.
+     */
     public @NonNull ImmutablePair<Integer, Integer> getScore() {
         return score;
     }
 
+    /** Returns the total sum of goals scored on the match. */
     public int getSumOfScore() {
         return score.left + score.right;
     }
 
+    /** Returns a concatenated string of the home team name and the away team name (in this order). */
     public @NonNull String getTeams() {
         return homeTeamName + awayTeamName;
     }
+
+    /**
+     * Set the current score of the match: the immutable pair's 'left' value should hold the home team's score and
+     * the 'right' value should hold the away team's score.
+     */
     public void setScore(final @NonNull ImmutablePair<Integer, Integer> newScore) {
         this.score = newScore;
     }
