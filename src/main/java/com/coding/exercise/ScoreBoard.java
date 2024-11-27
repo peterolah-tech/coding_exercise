@@ -23,10 +23,13 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class ScoreBoard {
     private static final String NOT_PLAYING_EXCEPTION_MESSAGE =
             "These teams are not currently playing each other";
+    private static final String NO_ONGOING_MATCHES_MESSAGE =
+            "There are no ongoing matches at the moment";
     private final @NonNull ReadWriteLock readWriteLock = new ReentrantReadWriteLock(true);
     private final @NonNull Lock writeLock = readWriteLock.writeLock();
     private final @NonNull Lock readLock = readWriteLock.readLock();
     private final @NonNull Set<Match> board;
+    private @NonNull String summary;
 
     public ScoreBoard() {
         this(new TreeSet<>(new MatchComparator()));
@@ -35,6 +38,7 @@ public class ScoreBoard {
     @VisibleForTesting
     ScoreBoard(final @NonNull Set<Match> board) {
         this.board = board;
+        this.summary = NO_ONGOING_MATCHES_MESSAGE;
     }
 
     /**
@@ -47,6 +51,7 @@ public class ScoreBoard {
         try {
             validateTeams(homeTeamName, awayTeamName);
             board.add(new Match(homeTeamName, awayTeamName));
+            updateSummary();
         } finally {
             writeLock.unlock();
         }
@@ -71,6 +76,7 @@ public class ScoreBoard {
                 board.remove(match);
                 match.setScore(newScore);
                 board.add(match);
+                updateSummary();
             } else {
                 throw new IllegalArgumentException(NOT_PLAYING_EXCEPTION_MESSAGE);
             }
@@ -89,6 +95,7 @@ public class ScoreBoard {
             if (optionalMatch.isPresent()) {
                 Match match = optionalMatch.get();
                 board.remove(match);
+                updateSummary();
             } else {
                 throw new IllegalArgumentException(NOT_PLAYING_EXCEPTION_MESSAGE);
             }
@@ -107,22 +114,8 @@ public class ScoreBoard {
      */
     public @NonNull String getSummary() {
         readLock.lock();
-        if (board.isEmpty()) {
-            return "There are no ongoing matches at the moment";
-        }
-        StringBuilder stringBuilder = new StringBuilder();
         try {
-            int counter = 1;
-            for (Match match : board) {
-                stringBuilder.append(counter);
-                stringBuilder.append(". ");
-                stringBuilder.append(match.toString());
-                if (counter != board.size()) {
-                    stringBuilder.append(System.lineSeparator());
-                }
-                counter++;
-            }
-            return stringBuilder.toString();
+            return summary;
         } finally {
             readLock.unlock();
         }
@@ -173,5 +166,27 @@ public class ScoreBoard {
         return board.stream()
                 .filter(match -> match.getTeams().equals(lookedUpTeams))
                 .findAny();
+    }
+
+    /**
+     * Updates the summary based on the information stored in the board object.
+     * <p>This must be called after each operation which modifies the board.
+     */
+    private void updateSummary() {
+        if (board.isEmpty()) {
+            this.summary = NO_ONGOING_MATCHES_MESSAGE;
+        }
+        StringBuilder stringBuilder = new StringBuilder();
+        int counter = 1;
+        for (Match match : board) {
+            stringBuilder.append(counter);
+            stringBuilder.append(". ");
+            stringBuilder.append(match.toString());
+            if (counter != board.size()) {
+                stringBuilder.append(System.lineSeparator());
+            }
+            counter++;
+        }
+        this.summary = stringBuilder.toString();
     }
 }
