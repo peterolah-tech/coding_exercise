@@ -151,7 +151,7 @@ class ScoreBoardTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> scoreBoard.updateScore("Mexico", "Canada", invalidScore));
         Assertions.assertEquals(
-                "At least one of the scores should be higher than the current one", exception.getMessage());
+                "Scores cannot decrease and at least one of the scores should be higher than the current one", exception.getMessage());
     }
 
     @Test
