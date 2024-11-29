@@ -2,6 +2,7 @@ package com.coding.exercise;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -45,12 +46,14 @@ public class ScoreBoard {
      * Start a new {@link Match} and register it on the board.
      */
     public void startMatch(final @NonNull String homeTeamName, final @NonNull String awayTeamName) {
-        Preconditions.checkArgument(!homeTeamName.isBlank() && !awayTeamName.isBlank(),
+        final String formattedHomeTeam = formatTeamName(homeTeamName);
+        final String formattedAwayTeam = formatTeamName(awayTeamName);
+        Preconditions.checkArgument(!formattedHomeTeam.isBlank() && !formattedAwayTeam.isBlank(),
                 "The teams names cannot be blank");
         writeLock.lock();
         try {
-            validateTeams(homeTeamName, awayTeamName);
-            board.add(new Match(homeTeamName, awayTeamName));
+            validateTeams(formattedHomeTeam, formattedAwayTeam);
+            board.add(new Match(formattedHomeTeam, formattedAwayTeam));
             updateSummary();
         } finally {
             writeLock.unlock();
@@ -65,9 +68,11 @@ public class ScoreBoard {
             final @NonNull String homeTeamName,
             final @NonNull String awayTeamName,
             final @NonNull ImmutablePair<Integer, Integer> newScore) {
+        final String formattedHomeTeam = formatTeamName(homeTeamName);
+        final String formattedAwayTeam = formatTeamName(awayTeamName);
         writeLock.lock();
         try {
-            Optional<Match> optionalMatch = getMatch(homeTeamName, awayTeamName);
+            Optional<Match> optionalMatch = getMatch(formattedHomeTeam, formattedAwayTeam);
             ImmutablePair<Integer, Integer> oldScore;
             if (optionalMatch.isPresent()) {
                 Match match = optionalMatch.get();
@@ -89,9 +94,11 @@ public class ScoreBoard {
      * Finish an existing {@link Match} and deregister it from the score board.
      */
     public void finishMatch(final @NonNull String homeTeamName, final @NonNull String awayTeamName) {
+        final String formattedHomeTeam = formatTeamName(homeTeamName);
+        final String formattedAwayTeam = formatTeamName(awayTeamName);
         writeLock.lock();
         try {
-            Optional<Match> optionalMatch = getMatch(homeTeamName, awayTeamName);
+            Optional<Match> optionalMatch = getMatch(formattedHomeTeam, formattedAwayTeam);
             if (optionalMatch.isPresent()) {
                 Match match = optionalMatch.get();
                 board.remove(match);
@@ -119,6 +126,11 @@ public class ScoreBoard {
         } finally {
             readLock.unlock();
         }
+    }
+
+    private @NonNull String formatTeamName(@NonNull String rawTeamName) {
+        String strippedName = rawTeamName.strip();
+        return StringUtils.capitalize(strippedName.toLowerCase());
     }
 
     /**
