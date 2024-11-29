@@ -258,4 +258,21 @@ class ScoreBoardTest {
         String actualSummary = scoreBoard.getSummary();
         Assertions.assertEquals(expectedSummary, actualSummary);
     }
+
+    @Test
+    void testGetSummaryWithMatchesOneFinishes() {
+        scoreBoard.startMatch("Mexico", "Canada");
+        scoreBoard.startMatch("Spain", "Brazil");
+        scoreBoard.startMatch("Germany", "France");
+        scoreBoard.updateScore("Mexico", "Canada",
+                new ImmutablePair<>(0,5));
+        scoreBoard.updateScore("Spain", "Brazil",
+                new ImmutablePair<>(10,2));
+        scoreBoard.updateScore("Germany", "France",
+                new ImmutablePair<>(3,2));
+        scoreBoard.finishMatch("Germany", "France");
+        String expectedSummary = "1. Spain 10 - Brazil 2" + System.lineSeparator() + "2. Mexico 0 - Canada 5";
+        String actualSummary = scoreBoard.getSummary();
+        Assertions.assertEquals(expectedSummary, actualSummary);
+    }
 }
