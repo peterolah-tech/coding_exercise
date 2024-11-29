@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -87,6 +88,24 @@ class ScoreBoardTest {
                         () -> Assertions.fail("There were no matches on the board"));
     }
 
+    @Test
+    void testTeamNameCapitalizationAtStart() {
+        scoreBoard.startMatch("sweden", "finland");
+        Optional<Match> optionalMatch = testBoard.stream()
+                .filter(match -> match.getTeams().equals("SwedenFinland"))
+                .findAny();
+        Assertions.assertTrue(optionalMatch.isPresent());
+    }
+
+    @Test
+    void testTeamNameStripAtStart() {
+        scoreBoard.startMatch("  Sweden", "Finland  ");
+        Optional<Match> optionalMatch = testBoard.stream()
+                .filter(match -> match.getTeams().equals("SwedenFinland"))
+                .findAny();
+        Assertions.assertTrue(optionalMatch.isPresent());
+    }
+
     // Tests for UPDATE
     @Test
     void testUpdateScoreOnce() {
@@ -144,6 +163,36 @@ class ScoreBoardTest {
                 "These teams are not currently playing each other", exception.getMessage());
     }
 
+    @Test
+    void testTeamNameCapitalizationAtUpdate() {
+        scoreBoard.startMatch("Sweden", "Finland");
+        scoreBoard.updateScore("sweden", "finland", new ImmutablePair<>(1,0));
+        testBoard.stream()
+                .filter(match -> match.getTeams().equals("SwedenFinland"))
+                .findAny()
+                .ifPresentOrElse(
+                        match -> {
+                            Assertions.assertEquals(1, match.getScore().getLeft());
+                            Assertions.assertEquals(0, match.getScore().getRight());
+                        },
+                        () -> Assertions.fail("The match to be updated was not registered on the board"));
+    }
+
+    @Test
+    void testTeamNameStripAtUpdate() {
+        scoreBoard.startMatch("Sweden", "Finland");
+        scoreBoard.updateScore("  Sweden", "Finland  ", new ImmutablePair<>(1,0));
+        testBoard.stream()
+                .filter(match -> match.getTeams().equals("SwedenFinland"))
+                .findAny()
+                .ifPresentOrElse(
+                        match -> {
+                            Assertions.assertEquals(1, match.getScore().getLeft());
+                            Assertions.assertEquals(0, match.getScore().getRight());
+                        },
+                        () -> Assertions.fail("The match to be updated was not registered on the board"));
+    }
+
     // Tests for FINISH
     @Test
     void testFinishMatch() {
@@ -164,6 +213,22 @@ class ScoreBoardTest {
                 () -> scoreBoard.finishMatch("Mexico", "Canada"));
         Assertions.assertEquals(
                 "These teams are not currently playing each other", exception.getMessage());
+    }
+
+    @Test
+    void testTeamNameCapitalizationAtFinish() {
+        scoreBoard.startMatch("Sweden", "Finland");
+        Assertions.assertEquals(1, testBoard.size());
+        scoreBoard.finishMatch("sweden", "finland");
+        Assertions.assertTrue(testBoard.isEmpty());
+    }
+
+    @Test
+    void testTeamNameStripAtFinish() {
+        scoreBoard.startMatch("Sweden", "Finland");
+        Assertions.assertEquals(1, testBoard.size());
+        scoreBoard.finishMatch("  Sweden", "Finland  ");
+        Assertions.assertTrue(testBoard.isEmpty());
     }
 
     // Tests for SUMMARY
