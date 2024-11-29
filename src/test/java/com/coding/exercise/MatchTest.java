@@ -58,8 +58,7 @@ class MatchTest {
 
     @Test
     void testSetNegativeScore() {
-        match.setScore(new ImmutablePair<>(0, -1));
-        ImmutablePair<Integer, Integer> invalidScore = new ImmutablePair<>(0, 1);
+        ImmutablePair<Integer, Integer> invalidScore = new ImmutablePair<>(0, -1);
         IllegalArgumentException exception =
                 Assertions.assertThrows(IllegalArgumentException.class, () -> match.setScore(invalidScore));
         Assertions.assertEquals(
